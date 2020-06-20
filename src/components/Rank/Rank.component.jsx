@@ -1,10 +1,10 @@
 import React from "react";
 import "./Rank.styles.css";
 
-const Rank = () => (
+const Rank = ({ userLogin }) => (
   <div>
     <div className="white f3">{"Your current rank is..."}</div>
-    <div className="white f1">{"#5"}</div>
+    <div className="white f1">{`#${userLogin.entries}`}</div>
   </div>
 );
 
