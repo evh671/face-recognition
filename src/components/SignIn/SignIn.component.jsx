@@ -23,7 +23,7 @@ class SignIn extends Component {
   };
 
   onSubmitLogin = () => {
-    const { onChangeRoute, setUserLogin } = this.props;
+    const { onChangeRoute, setUserLogin, setImageUrl } = this.props;
 
     this.setState({ isSignError: false });
 
@@ -39,15 +39,18 @@ class SignIn extends Component {
     })
       .then((response) => response.json())
       .then((userLogin) => {
-        if (userLogin) {
+        if (userLogin.id) {
           console.log("userLogin Fetch:", userLogin);
 
           setUserLogin(userLogin);
+          setImageUrl("");
           onChangeRoute(Routes.HOME);
         } else {
           this.setState({
             isSignError: true,
-            signErrorMessage: "Email or Password are incorrect!",
+            signErrorMessage: userLogin,
+
+            // signErrorMessage: "Email or Password are incorrect!",
           });
         }
       });

@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 // import "../../App.css";
 import "./ImageLinkForm.styles.css";
-import Clarifai from "clarifai";
+// import Clarifai from "clarifai";
 
 const isUrlEmpty = (url) => url === "" || url === null;
 
-const app = new Clarifai.App({
-  apiKey: "b91ec4ae740d4fc8899f56b470c07e90",
-});
+// const app = new Clarifai.App({
+//   apiKey: "08a27dddb7644acc8461f3ef7594ea7c",
+// });
 
 class ImageLinkForm extends Component {
   constructor(props) {
@@ -41,15 +41,40 @@ class ImageLinkForm extends Component {
   onClickDetectSubmit = () => {
     const { setImageBox, setImageUrl } = this.props;
 
-    app.models
-      .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
-      .then((response) => setImageBox(this.calculateBox(response)))
+    console.log("this.state.input: ", this.state.input);
+
+    fetch("http://localhost:5000/imageUrl", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        input: this.state.input,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => setImageBox(this.calculateBox(data)))
       .catch((err) => {
-        console.log(err);
+        console.log("Clarifai Error:", err);
       });
 
     setImageUrl(this.state.input);
   };
+
+  // onClickDetectSubmit = () => {
+  //   const { setImageBox, setImageUrl } = this.props;
+
+  //   console.log("this.state.input: ", this.state.input);
+
+  //   app.models
+  //     .predict("c0c0ac362b03416da06ab3fa36fb58e3", this.state.input)
+  //     .then((response) => setImageBox(this.calculateBox(response)))
+  //     .catch((err) => {
+  //       console.log("Clarifai Error:", err);
+  //     });
+
+  //   setImageUrl(this.state.input);
+  // };
 
   render() {
     return (

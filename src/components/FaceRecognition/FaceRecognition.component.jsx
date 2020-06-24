@@ -31,7 +31,9 @@ class FaceRecognition extends Component {
     const { imageUrl } = this.props;
     this.setState({ imageUrl });
 
-    this.updatedUserEntries();
+    if (imageUrl) {
+      this.updatedUserEntries();
+    }
   }
 
   componentDidUpdate(prevProps) {

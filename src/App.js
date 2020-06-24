@@ -71,6 +71,7 @@ class App extends Component {
           <SignIn
             onChangeRoute={this.onChangeRoute}
             setUserLogin={this.setUserLogin}
+            setImageUrl={this.setImageUrl}
           />
         ) : route === Routes.REGISTER ? (
           <Register onChangeRoute={this.onChangeRoute} />

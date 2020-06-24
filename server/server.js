@@ -3,7 +3,28 @@ let database = require("./database.js");
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const db = require("knex")({
+  client: "pg",
+  connection: {
+    host: "127.0.0.1",
+    user: "postgres",
+    password: "test",
+    database: "smart-brain",
+  },
+});
 
+// Loading BCrypt
+const SALT_ROUNDS = 10;
+const bcrypt = require("bcrypt");
+const salt = bcrypt.genSaltSync(SALT_ROUNDS);
+
+// Loading Controllers
+const signin = require("./controllers/signin");
+const register = require("./controllers/register");
+const image = require("./controllers/image");
+const profile = require("./controllers/profile");
+
+// Loading Express.js
 const app = express();
 
 // parse application/x-www-form-urlencoded
@@ -21,79 +42,23 @@ app.get("/", (req, res) => {
 });
 
 app.get("/profile/:userId", (req, res) => {
-  const userId = req.params.userId;
-
-  console.log("userId", userId);
-  let userFound = {};
-
-  for (let user of database.users) {
-    if (userId.toString() === user.id) {
-      Object.assign(userFound, user);
-      break;
-    }
-  }
-
-  res.json(userFound);
+  profile.handleProfileGet(req, res, db);
 });
 
 app.post("/signin", (req, res) => {
-  const { users } = database;
-  const { email, password } = req.body;
-
-  console.log("email", email);
-  console.log("password", password);
-
-  let userLogin = users.find(
-    (user) => email === user.email && password === user.password
-  );
-
-  userLogin ? res.status(200).json(userLogin) : res.json(null);
-
-  // userLogin ? res.status(200).json(userLogin) : res.status(400).json(userLogin);
-
-  // let isValidated = database.users.some(
-  //   (user) => email === user.email && password === user.password
-  // );
-
-  // isValidated
-  //   ? res.json("success")
-  //   : res.status(400).json("Email or Password are incorrect!");
+  signin.handleSignin(req, res, db, bcrypt);
 });
 
 app.post("/register", (req, res) => {
-  let { users } = database;
-  const { name, email, password } = req.body;
-
-  console.log("name", name);
-  console.log("email", email);
-  console.log("password", password);
-
-  users.push({
-    id: (++database.currentID).toString(),
-    name: name,
-    email: email,
-    password: password,
-    entries: 0,
-    joined: new Date(),
-  });
-
-  console.log(users[users.length - 1]);
-  res.json(users[users.length - 1]);
+  register.handleRegister(req, res, db, bcrypt, salt);
 });
 
 app.put("/image", (req, res) => {
-  const { userId } = req.body;
-  let { users } = database;
-  let currentUser = {};
+  image.handleImage(req, res, db);
+});
 
-  for (let user of users) {
-    if (userId === user.id) {
-      currentUser = Object.assign(user, { entries: user.entries + 1 });
-      break;
-    }
-  }
-
-  res.json(currentUser);
+app.post("/imageUrl", (req, res) => {
+  image.handleAPICall(req, res);
 });
 
 app.listen(5000, () => {

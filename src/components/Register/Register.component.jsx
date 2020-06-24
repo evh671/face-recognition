@@ -11,6 +11,8 @@ class Register extends Component {
       registerName: "",
       registerEmail: "",
       registerPassword: "",
+      isRegisterError: false,
+      registerErrorMessage: "",
     };
   }
 
@@ -26,27 +28,51 @@ class Register extends Component {
     this.setState({ registerPassword: event.target.value });
   };
 
+  isValidEmail = (email) => {
+    let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+  };
+
   onSubmitRegister = () => {
+    const { registerName, registerEmail, registerPassword } = this.state;
     const { onChangeRoute } = this.props;
 
-    fetch("http://localhost:5000/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: this.state.registerName,
-        email: this.state.registerEmail,
-        password: this.state.registerPassword,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data) {
-          console.log("Registered User: ", data);
-          onChangeRoute(Routes.SIGN_IN);
-        }
+    this.setState({ isRegisterError: false });
+
+    if (
+      !registerName ||
+      !this.isValidEmail(registerEmail) ||
+      !registerPassword
+    ) {
+      this.setState({
+        isRegisterError: true,
+        registerErrorMessage: "Error on Credentials!",
       });
+    } else {
+      fetch("http://localhost:5000/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: this.state.registerName,
+          email: this.state.registerEmail,
+          password: this.state.registerPassword,
+        }),
+      })
+        .then((response) => response.json())
+        .then((user) => {
+          if (user.id) {
+            console.log("Registered User: ", user);
+            onChangeRoute(Routes.SIGN_IN);
+          } else {
+            this.setState({
+              isRegisterError: true,
+              registerErrorMessage: user,
+            });
+          }
+        });
+    }
   };
 
   render() {
@@ -104,6 +130,11 @@ class Register extends Component {
             </div>
           </fieldset>
         </div>
+        {this.state.isRegisterError ? (
+          <div className="fade-in-out">
+            <h1 className="error-message">{this.state.registerErrorMessage}</h1>
+          </div>
+        ) : null}
       </div>
     );
   }
